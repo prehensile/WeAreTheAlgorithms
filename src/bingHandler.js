@@ -2,7 +2,7 @@ var fs = require('fs');
 
 var secrets = require( './secrets' );
 
-var Bing = require('node-bing-api')({ accKey: secrets.bing_key });
+var Bing = require('node-bing-api')({ accKey: secrets.BingKey });
 var Tokenizer = require('sentence-tokenizer');
 
 

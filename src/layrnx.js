@@ -4,15 +4,19 @@ var fs = require('fs');
 var AWS = require('aws-sdk');
 
 var secrets = require( './secrets' );
+var config = require( './config' );
 
-var polly = new AWS.Polly({
-    accessKeyId : secrets.aws_polly.access_key,
-    secretAccessKey : secrets.aws_polly.secret,
+
+var awsDefaults = {
+    accessKeyId : secrets.AWSPolly.AccessKey,
+    secretAccessKey : secrets.AWSPolly.Secret,
     region : "eu-west-1"
-});
+};
+var polly = new AWS.Polly( awsDefaults );
+var s3 = new AWS.S3( awsDefaults );
 
 
-var voices = [
+var pollyVoices = [
     "Joanna",
     "Kimberly",
     "Joey",
@@ -22,11 +26,36 @@ var voices = [
 ];
 
 
-function renderSentence( sentence ){
-    
-    var voice = voices[ sentence.length % voices.length ];
-    var filename = crypto.createHash('md5').update( sentence ).digest( 'hex' ) + ".mp3";
+function keyForSentence( sentence ){
+    // return crypto.createHash('md5').update( sentence ).digest( 'hex' );
+    return sentence.toLowerCase().replace(/[^bcdfghjklmnpqrstvwxyz]/g,'');
+}
 
+
+function bucketURLForKey( key ){
+    return config.AWS.S3.URLBucketRoot + key;
+}
+
+
+function itPutsTheStreamInTheBucket( stream, key, contentType ){
+    s3.upload(
+        {
+            Bucket : config.AWS.S3.SpeechBucket,
+            Key : key,
+            Body : stream,
+            ContentType : contentType
+        },
+        function( err, data ) {
+            if( err ) throw err;
+            // console.log( data );
+        }
+    );
+}
+
+function renderSentenceForRealsies( sentence, filename ){
+    
+    var voice = pollyVoices[ sentence.length % pollyVoices.length ];
+    
     polly.synthesizeSpeech(
         {
             OutputFormat : "mp3",
@@ -44,25 +73,60 @@ function renderSentence( sentence ){
                     if( err ) throw err;
                 }
             );
+
+            itPutsTheStreamInTheBucket(
+                data.AudioStream,
+                filename,
+                data.ContentType
+            );
+        }
+    );
+}
+
+function renderSentence( sentence ){
+    
+    console.log( "renderSentence: " + sentence );
+
+    var filename = keyForSentence( sentence ) + ".mp3";
+    var fileURL = bucketURLForKey( filename );
+
+    // before rendering, check if this sentence is already in S3
+    s3.headObject( 
+        {
+            Bucket: config.AWS.S3.SpeechBucket,
+            Key: filename
+        },
+        function(err, data) {
+            if( err ){
+                // console.log( "-> key does not exist, render" );
+                // error! object probably doesn't exist, so render it
+                // console.log( err );
+                renderSentenceForRealsies( sentence, filename );
+            }
+            else {
+                // success! object exists, so let's not do anything.
+                // console.log( "-> key exists, don't render" );
+                // console.log( data );
+            }
         }
     );
 
-    return filename;
+    return fileURL;
 }
 
 
 function renderSentences( sentences, callback ){
 
-    var filenames = [];
+    var urls = [];
 
     for (var i = 0; i < sentences.length; i++) {
         var thisSentence = sentences[i];
-        filenames.push(
+        urls.push(
             renderSentence( thisSentence )
         );
     }
 
-    callback( null, filenames );
+    callback( null, urls );
 
 }
 
