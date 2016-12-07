@@ -30,8 +30,8 @@ function processItem( item, stem ){
             
             var sentence = sentences[ii];
 
-            console.log( sentence );
-            console.log( "sentence length: " + sentence.split(' ').length );
+//            console.log( sentence );
+            // console.log( "sentence length: " + sentence.split(' ').length );
 
             // now, let's do some checks on this sentence.
             var acceptSentence = true;
@@ -46,19 +46,18 @@ function processItem( item, stem ){
 
             // don't want really short sentences
             // (split on a space to count words)
-            if( sentence.split(' ').length < 2 )
+            if( sentence.split(' ').length < 3 )
                 acceptSentence = false;
 
             // quotations usually turn out weird
             if( sentence.match(/['"“”‘’]/gi) )
                 acceptSentence = false;
 
-            console.log( `-> acceptSentence:${acceptSentence}` );
+            // console.log( `-> acceptSentence:${acceptSentence}` );
 
             // all checks done, push if acceptable
             if( acceptSentence )
                 statements.push( sentence );
-            
         }
     }
 
