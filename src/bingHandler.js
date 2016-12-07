@@ -20,18 +20,23 @@ function processItem( item, stem ){
 
         // trim description to stem and everything after
         d = d.substring( i );
+
+        //TODO: detect strings that start in the middle of a quote and abort
+        // ...e.g. detect non-equal amounts of " or fancier quote marks
         
         tokenizer.setEntry( d );
         sentences = tokenizer.getSentences();
 
-        for( var ii in sentences ){
-            var sentence = sentences[ii];
-            // console.log( sentence );
-            if( sentence.indexOf(stem) > -1 ){
-                //sentence = sentence.split( "," )[0];
-                if(sentence.indexOf( "..." ) < 0){
-                    statements.push( sentence );
-                    // console.log( "^^^" );
+        if( sentences.length > 2 ){
+            for( var ii in sentences ){
+                var sentence = sentences[ii];
+                // console.log( sentence );
+                if( sentence.indexOf(stem) > -1 ){
+                    //sentence = sentence.split( "," )[0];
+                    if(sentence.indexOf( "..." ) < 0){
+                        statements.push( sentence );
+                        // console.log( "^^^" );
+                    }
                 }
             }
         }

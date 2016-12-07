@@ -9,6 +9,29 @@ function SSMLForAudioURLs( audioURLs ){
 }
 
 
+function SSMLForSpeechElements( elements ) {
+    var ssml = "<speak>";
+    
+    for (var i = 0; i < elements.length; i++) {
+        
+        var element = elements[i];
+        var type = element[ "type" ];
+        var content = element[ "content" ];
+
+        if(type === 'text'){
+            ssml += content
+        } else if( type === 'audio'){
+            ssml += `<audio src="${content}" />`;    
+        }
+    }
+    
+    ssml += "</speak>";
+    
+    return ssml;
+}
+
+
 module.exports = {
-    "SSMLForAudioURLs" : SSMLForAudioURLs
+    "SSMLForAudioURLs" : SSMLForAudioURLs,
+    'SSMLForSpeechElements' : SSMLForSpeechElements
 };

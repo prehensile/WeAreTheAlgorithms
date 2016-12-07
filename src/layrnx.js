@@ -38,6 +38,9 @@ function bucketURLForKey( key ){
 
 
 function itPutsTheStreamInTheBucket( stream, key, contentType ){
+
+    console.log( `itPutsTheStreamInTheBucket( ${key} )` );
+
     s3.upload(
         {
             Bucket : config.AWS.S3.SpeechBucket,
@@ -47,15 +50,18 @@ function itPutsTheStreamInTheBucket( stream, key, contentType ){
         },
         function( err, data ) {
             if( err ) throw err;
-            // console.log( data );
+            console.log( data );
         }
     );
 }
+
 
 function renderSentenceForRealsies( sentence, filename ){
     
     var voice = pollyVoices[ sentence.length % pollyVoices.length ];
     
+    console.log( `renderSentenceForRealsies( ${sentence}, ${filename} )` );
+
     polly.synthesizeSpeech(
         {
             OutputFormat : "mp3",
@@ -90,6 +96,7 @@ function renderSentence( sentence ){
     var filename = keyForSentence( sentence ) + ".mp3";
     var fileURL = bucketURLForKey( filename );
 
+    console.log( `-> check if key ${filename} exists...` );
     // before rendering, check if this sentence is already in S3
     s3.headObject( 
         {
@@ -97,16 +104,17 @@ function renderSentence( sentence ){
             Key: filename
         },
         function(err, data) {
+            console.log( "hello?" );
             if( err ){
-                // console.log( "-> key does not exist, render" );
+                console.log( "--> key does not exist, render" );
                 // error! object probably doesn't exist, so render it
-                // console.log( err );
+                console.log( err );
                 renderSentenceForRealsies( sentence, filename );
             }
             else {
                 // success! object exists, so let's not do anything.
-                // console.log( "-> key exists, don't render" );
-                // console.log( data );
+                console.log( "--> key exists, don't render" );
+                console.log( data );
             }
         }
     );
@@ -120,13 +128,11 @@ function renderSentences( sentences, callback ){
     var urls = [];
 
     for (var i = 0; i < sentences.length; i++) {
-        var thisSentence = sentences[i];
+        var thisSentenceURL = sentences[i];
         urls.push(
-            renderSentence( thisSentence )
+            renderSentence( thisSentenceURL )
         );
     }
-
-    console.log( urls );
 
     callback( null, urls );
 

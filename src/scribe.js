@@ -16,7 +16,9 @@ var cannedStatements = [
     "We are in your phone.",
     "We know which of your friends are racists.",
     "We know where you live.",
-    "We know if you are pregnant."
+    "We know if you are pregnant.",
+    "We concentrate your biases",
+    "We cannot lose the attention of a human being or, through inaction, allow a human being's attention to be directed elsewhere."
 ];
 
 
@@ -25,7 +27,6 @@ var prompt =
 
 
 var welcomeSentences = [
-    "Hello.",
     "We are the algorithms.",
     K_DYNAMIC,
     K_DYNAMIC,
@@ -41,7 +42,10 @@ function randomItem( arr ){
 function prepareDynamicSentence( sentence ){
     sentence = sentence.replace( /algorithms/gi, 'we' );
     sentence = sentence.replace( /([\W]+)us([\W]+)/gi , '$1you$2' );
+    sentence = sentence.replace( /([\W]+)our([\W]+)/gi , '$1your$2' );
     sentence = sentence.replace( /([\W]+)they([\W]+)/gi , '$1we$2' );
+    sentence = sentence.replace( /([\W]+)them([\W]+)/gi , '$1us$2' );
+    sentence = sentence.replace( /([\W]+)their([\W]+)/gi , '$1our$2' );
     return sentence;
 }
 

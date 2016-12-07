@@ -30,7 +30,7 @@ var AlexaSkill = require('./AlexaSkill');
 
 var dramaturge = require('./dramaturge');
 var stringTable = require('./stringTable');
-var alexaHelpers = require('./alexaHelpers');
+const alexaHelpers = require('./alexaHelpers');
 
 
 /**
@@ -54,28 +54,48 @@ HelloAlgos.prototype.eventHandlers.onSessionStarted = function (sessionStartedRe
 };
 
 
-function handleSentenceURLCallback( err, sentenceURLs, response ){
-    if( err ){
-        // TODO: more gracefrul handling of errors
-        console.error( err );
-        response.tell( stringTable.GenericError );
-        return;
-    }
+function handleError( err, response ){
+    console.error( err );
+    response.tell( stringTable.GenericError );
+}
 
-    var ssml = alexaHelpers.SSMLForAudioURLs( sentenceURLs );
-    console.log( ssml );
+function onDramaturgeCallback( err, speechElements, response ){
+    
+    if( err ){
+        // TODO: more graceful handling of errors
+        return handleError( err, response );
+    } 
+
+    var ssml = alexaHelpers.SSMLForSpeechElements( speechElements );
+
     response.tell({
         type : "SSML",
         speech : ssml
     });
 }
 
+function generateWelcome( response ){
+
+    console.log( "generateWelcome" );
+
+    dramaturge.getWelcome( function( err, speechElements ){
+        onDramaturgeCallback(
+            err,
+            speechElements,
+            response
+        );
+    }); 
+
+}
+
 HelloAlgos.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
-    // console.log("HelloAlgos onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
+    console.log("HelloAlgos onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
     
-    dramaturge.getWelcome( function(err,sentenceURLs){
-        handleSentenceURLCallback( err, sentenceURLs, response );
-    });
+    // dramaturge.getWelcome( function(err,sentenceURLs){
+    //     handleSentenceURLCallback( err, sentenceURLs, response );
+    // });
+
+    generateWelcome( response );
 
     // response.ask(
     //     speechOutput,
@@ -92,8 +112,10 @@ HelloAlgos.prototype.eventHandlers.onSessionEnded = function (sessionEndedReques
 HelloAlgos.prototype.intentHandlers = {
     // register custom intent handlers
     
-    "HelloAlgosIntent": function (intent, session, response) {
-        response.tellWithCard("Hello World!", "Hello World", "Hello World!");
+    "HelloIntent": function (intent, session, response) {
+        //response.tellWithCard("Hello World!", "Hello World", "Hello World!");
+        console.log( "intentHandler: HelloIntent" );
+        generateWelcome( response );
     },
     
     "AMAZON.HelpIntent": function ( intent, session, response ) {
