@@ -29,6 +29,9 @@ var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-valu
 var AlexaSkill = require('./AlexaSkill');
 
 var dramaturge = require('./dramaturge');
+var stringTable = require('./stringTable');
+var alexaHelpers = require('./alexaHelpers');
+
 
 /**
  * HelloAlgos is a child of AlexaSkill.
@@ -37,7 +40,7 @@ var dramaturge = require('./dramaturge');
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
  */
 var HelloAlgos = function () {
-    AlexaSkill.call(this, APP_ID);
+    AlexaSkill.call( this, APP_ID );
 };
 
 // Extend AlexaSkill
@@ -50,14 +53,34 @@ HelloAlgos.prototype.eventHandlers.onSessionStarted = function (sessionStartedRe
     // any initialization logic goes here
 };
 
+
+function handleSentenceURLCallback( err, sentenceURLs, response ){
+    if( err ){
+        // TODO: more gracefrul handling of errors
+        console.error( err );
+        response.tell( stringTable.GenericError );
+        return;
+    }
+
+    var ssml = alexaHelpers.SSMLForAudioURLs( sentenceURLs );
+    console.log( ssml );
+    response.tell({
+        type : "SSML",
+        speech : ssml
+    });
+}
+
 HelloAlgos.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
-    console.log("HelloAlgos onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to the Alexa Skills Kit, you can say hello";
+    // console.log("HelloAlgos onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
     
-    response.ask(
-        speechOutput,
-        repromptText
-    );
+    dramaturge.getWelcome( function(err,sentenceURLs){
+        handleSentenceURLCallback( err, sentenceURLs, response );
+    });
+
+    // response.ask(
+    //     speechOutput,
+    //     repromptText
+    // );
 };
 
 HelloAlgos.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
