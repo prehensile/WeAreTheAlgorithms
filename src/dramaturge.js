@@ -18,6 +18,9 @@ function onSentencesRendered( sentenceURLs, speechElements, callback ){
 
 
 function onSentencesWritten( sentences, speechElements, callback ){
+
+    // console.log( "onSentencesWritten" );
+
     layrnx.renderSentences( sentences , function( err, urls ){
         if (err) return callback( err );
         else onSentencesRendered(
@@ -30,6 +33,8 @@ function onSentencesWritten( sentences, speechElements, callback ){
 
 
 function getWelcome( callback ){
+
+    console.log( "getWelcome" );
 
     var speechElements = [{
         type: "text",

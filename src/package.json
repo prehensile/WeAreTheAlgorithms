@@ -9,6 +9,7 @@
   "author": "Henry Cooke, me@prehensile.co.uk",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.1.4",
     "aws-sdk": "^2.7.10",
     "node-bing-api": "^3.0.1",
     "sentence-tokenizer": "0.0.7"

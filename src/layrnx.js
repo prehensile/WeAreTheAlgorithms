@@ -1,10 +1,11 @@
-var crypto = require('crypto');
-var fs = require('fs');
+const crypto = require('crypto');
+const fs = require('fs');
 
-var AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
+const async = require('async');
 
-var secrets = require( './secrets' );
-var config = require( './config' );
+const secrets = require( './secrets' );
+const config = require( './config' );
 
 
 var awsDefaults = {
@@ -89,7 +90,7 @@ function renderSentenceForRealsies( sentence, filename ){
     );
 }
 
-function renderSentence( sentence ){
+function renderSentence( sentence, callback ){
     
     console.log( "renderSentence: " + sentence );
 
@@ -103,39 +104,58 @@ function renderSentence( sentence ){
             Bucket: config.AWS.S3.SpeechBucket,
             Key: filename
         },
-        function(err, data) {
-            console.log( "hello?" );
+        function( err, data ) {
+            
             if( err ){
                 console.log( "--> key does not exist, render" );
                 // error! object probably doesn't exist, so render it
-                console.log( err );
+                // console.log( err );
                 renderSentenceForRealsies( sentence, filename );
-            }
-            else {
+            
+            } else {
                 // success! object exists, so let's not do anything.
                 console.log( "--> key exists, don't render" );
-                console.log( data );
+                // console.log( data );
             }
+
+            // pass fileURL to main callback only when headObject has completed
+            callback( null, fileURL );
         }
     );
-
-    return fileURL;
 }
 
 
 function renderSentences( sentences, callback ){
 
-    var urls = [];
+    // construct a list of renderSentence calls
+    // and call in parallel with async.js
+    // this is horrible.
 
+    // jesus christ we have to generate functions because javascript can't scope properly
+    function createTask( sentence ){
+        return function( taskCallback ){
+            renderSentence( sentence, taskCallback );
+        };
+    }
+
+    // step 666: construct list of tasks
+    var tasks = [];
     for (var i = 0; i < sentences.length; i++) {
-        var thisSentenceURL = sentences[i];
-        urls.push(
-            renderSentence( thisSentenceURL )
+        var thisSentence = sentences[i];
+        tasks.push(
+            createTask( thisSentence )
         );
     }
 
-    callback( null, urls );
-
+    // step 667: execute tasks, wait for all to
+    // complete before calling main callback
+    async.parallel(
+        tasks,
+        function( err, results ){
+            if( err ) return callback( err );
+            else callback( null, results );
+        }
+    );
 }
 
 module.exports = {

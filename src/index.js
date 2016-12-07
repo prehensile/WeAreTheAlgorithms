@@ -76,8 +76,6 @@ function onDramaturgeCallback( err, speechElements, response ){
 
 function generateWelcome( response ){
 
-    console.log( "generateWelcome" );
-
     dramaturge.getWelcome( function( err, speechElements ){
         onDramaturgeCallback(
             err,
