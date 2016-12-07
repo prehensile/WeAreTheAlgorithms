@@ -63,7 +63,8 @@ function getStatementsWithStemAndSubject( stem, subject, callback ){
 
     if( !stem ) stem = "algorithms are";
     
-    var q = `"${stem}"`;
+    //var q = `"${stem}"`;
+    var q = `"algorithms are" OR "algorithms will"`;
     if( subject ) q = `"${stem}" ${subject}`;
 
     // console.log( `bing query: ${q}` );
