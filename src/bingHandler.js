@@ -20,29 +20,47 @@ function processItem( item, stem ){
 
         // trim description to stem and everything after
         d = d.substring( i );
-
-        //TODO: detect strings that start in the middle of a quote and abort
-        // ...e.g. detect non-equal amounts of " or fancier quote marks
         
+        // break description into sentences
         tokenizer.setEntry( d );
         sentences = tokenizer.getSentences();
 
-        if( sentences.length > 2 ){
-            for( var ii in sentences ){
-                var sentence = sentences[ii];
-                // console.log( sentence );
-                if( sentence.indexOf(stem) > -1 ){
-                    //sentence = sentence.split( "," )[0];
-                    if(sentence.indexOf( "..." ) < 0){
-                        statements.push( sentence );
-                        // console.log( "^^^" );
-                    }
-                }
-            }
+        // iterate over sentences...
+        for( var ii in sentences ){
+            
+            var sentence = sentences[ii];
+
+            console.log( sentence );
+            console.log( "sentence length: " + sentence.split(' ').length );
+
+            // now, let's do some checks on this sentence.
+            var acceptSentence = true;
+
+            // only include sentences that include a stem
+            if( sentence.indexOf(stem) < 0 )
+                acceptSentence = false;
+
+            // don't want any truncated sentences
+            if( sentence.indexOf( "..." ) > -1)
+                acceptSentence = false;
+
+            // don't want really short sentences
+            // (split on a space to count words)
+            if( sentence.split(' ').length < 2 )
+                acceptSentence = false;
+
+            // quotations usually turn out weird
+            if( sentence.match(/['"“”‘’]/gi) )
+                acceptSentence = false;
+
+            console.log( `-> acceptSentence:${acceptSentence}` );
+
+            // all checks done, push if acceptable
+            if( acceptSentence )
+                statements.push( sentence );
+            
         }
     }
-
-    // console.log( statements );
 
     return statements;
 }
@@ -72,13 +90,17 @@ function getStatementsWithStemAndSubject( stem, subject, callback ){
     var q = `"algorithms are" OR "algorithms will"`;
     if( subject ) q = `"${stem}" ${subject}`;
 
-    // console.log( `bing query: ${q}` );
+    console.log( `bing query: ${q}` );
+    var ms = new Date().getTime();
 
     Bing.news( q , {
         top: 100,  // Number of results (max 15) 
     
     }, function(error, res, body){
-            
+        
+        ms = new Date().getTime() - ms;
+        console.log( `-> bing query completed in ${ms}ms` );
+
         if( error ){
             return callback( error, null );
         }
