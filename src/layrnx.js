@@ -73,13 +73,14 @@ function renderSentenceForRealsies( sentence, filename ){
         function( err, data ){
             if( err ) throw err;
             
+            /*
             fs.writeFile(
                 filename,
                 data.AudioStream,
                 function( err ){
                     if( err ) throw err;
                 }
-            );
+            );*/
 
             itPutsTheStreamInTheBucket(
                 data.AudioStream,
