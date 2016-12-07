@@ -38,3 +38,4 @@ jspm_packages
 
 # secrets
 secrets.js
+config.js
