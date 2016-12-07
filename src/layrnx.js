@@ -126,6 +126,8 @@ function renderSentences( sentences, callback ){
         );
     }
 
+    console.log( urls );
+
     callback( null, urls );
 
 }

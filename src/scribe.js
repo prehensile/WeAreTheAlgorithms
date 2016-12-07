@@ -39,10 +39,9 @@ function randomItem( arr ){
 
 
 function prepareDynamicSentence( sentence ){
-    sentence = sentence.replace( "algorithms", "we" );
-    // TODO: replace with sensible regexp // sentence = sentence.replace( "us", "you" );
-    sentence = sentence.replace( " us ", " you " );
-    sentence = sentence.replace( " they ", " we " );
+    sentence = sentence.replace( /algorithms/gi, 'we' );
+    sentence = sentence.replace( /([\W]+)us([\W]+)/gi , '$1you$2' );
+    sentence = sentence.replace( /([\W]+)they([\W]+)/gi , '$1we$2' );
     return sentence;
 }
 
