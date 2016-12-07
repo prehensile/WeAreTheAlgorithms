@@ -40,7 +40,7 @@ function bucketURLForKey( key ){
 
 function itPutsTheStreamInTheBucket( stream, key, contentType ){
 
-    console.log( `itPutsTheStreamInTheBucket( ${key} )` );
+   //  console.log( `itPutsTheStreamInTheBucket( ${key} )` );
 
     s3.upload(
         {
@@ -61,7 +61,7 @@ function renderSentenceForRealsies( sentence, filename ){
     
     var voice = pollyVoices[ sentence.length % pollyVoices.length ];
     
-    console.log( `renderSentenceForRealsies( ${sentence}, ${filename} )` );
+    // console.log( `renderSentenceForRealsies( ${sentence}, ${filename} )` );
 
     polly.synthesizeSpeech(
         {
@@ -98,7 +98,7 @@ function renderSentence( sentence, callback ){
     var filename = keyForSentence( sentence ) + ".mp3";
     var fileURL = bucketURLForKey( filename );
 
-    console.log( `-> check if key ${filename} exists...` );
+    // console.log( `-> check if key ${filename} exists...` );
     // before rendering, check if this sentence is already in S3
     s3.headObject( 
         {
@@ -108,14 +108,14 @@ function renderSentence( sentence, callback ){
         function( err, data ) {
             
             if( err ){
-                console.log( "--> key does not exist, render" );
+                // console.log( "--> key does not exist, render" );
                 // error! object probably doesn't exist, so render it
                 // console.log( err );
                 renderSentenceForRealsies( sentence, filename );
             
             } else {
                 // success! object exists, so let's not do anything.
-                console.log( "--> key exists, don't render" );
+                // console.log( "--> key exists, don't render" );
                 // console.log( data );
             }
 

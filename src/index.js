@@ -33,6 +33,8 @@ var stringTable = require('./stringTable');
 const alexaHelpers = require('./alexaHelpers');
 
 
+var __ts = new Date().getTime();
+
 /**
  * HelloAlgos is a child of AlexaSkill.
  * To read more about inheritance in JavaScript, see the link below.
@@ -68,6 +70,9 @@ function onDramaturgeCallback( err, speechElements, response ){
 
     var ssml = alexaHelpers.SSMLForSpeechElements( speechElements );
 
+    __ts = new Date().getTime() - __ts;
+    console.log( `request completed in ${__ts}ms` );
+
     response.tell({
         type : "SSML",
         speech : ssml
@@ -76,6 +81,8 @@ function onDramaturgeCallback( err, speechElements, response ){
 
 function generateWelcome( response ){
 
+    __ts = new Date().getTime();
+
     dramaturge.getWelcome( function( err, speechElements ){
         onDramaturgeCallback(
             err,
@@ -83,7 +90,6 @@ function generateWelcome( response ){
             response
         );
     }); 
-
 }
 
 HelloAlgos.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {

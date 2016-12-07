@@ -1,7 +1,12 @@
+var Chance = require('chance');
+
 var bing = require( "./bingHandler" );
 
 const K_DYNAMIC = "dynamic";
 const K_CANNED = "canned";
+
+
+var chance = new Chance();
 
 
 var cannedStatements = [
@@ -34,10 +39,6 @@ var welcomeSentences = [
     prompt
 ];
 
-function randomItem( arr ){
-    return arr[ Math.floor(Math.random()*arr.length) ];
-}
-
 
 function prepareDynamicSentence( sentence ){
     sentence = sentence.replace( /algorithms/gi, 'we' );
@@ -54,16 +55,22 @@ function constructSentences( welcomeSentences, dynamicStatements, callback ){
 
     sentencesOut = [];
 
+    // randomise order of dynamicStatements array
+    dynamicStatements = chance.shuffle( dynamicStatements );
+    var localCanned = chance.shuffle( cannedStatements );
+
     for (var i = 0; i < welcomeSentences.length; i++) {
         var thisSentence = welcomeSentences[i];
 
         if( thisSentence == K_DYNAMIC ){
+            
             thisSentence = prepareDynamicSentence(
-                randomItem( dynamicStatements )
+                dynamicStatements[ i ]
             );
         
         } else if( thisSentence == K_CANNED ){
-            thisSentence = randomItem( cannedStatements );
+            
+            thisSentence = localCanned[ i % localCanned.length ];
         }
 
         sentencesOut.push( thisSentence );
