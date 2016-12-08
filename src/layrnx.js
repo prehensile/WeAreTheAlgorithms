@@ -38,9 +38,9 @@ function bucketURLForKey( key ){
 }
 
 
-function itPutsTheStreamInTheBucket( stream, key, contentType ){
+function itPutsTheStreamInTheBucket( stream, key, contentType, callback ){
 
-   //  console.log( `itPutsTheStreamInTheBucket( ${key} )` );
+   console.log( `itPutsTheStreamInTheBucket( ${key} )` );
 
     s3.upload(
         {
@@ -50,14 +50,16 @@ function itPutsTheStreamInTheBucket( stream, key, contentType ){
             ContentType : contentType
         },
         function( err, data ) {
-            if( err ) throw err;
-            console.log( data );
+            if( err ) callback( err );
+            else {
+                callback( null );
+            }
         }
     );
 }
 
 
-function renderSentenceForRealsies( sentence, filename ){
+function renderSentenceForRealsies( sentence, filename, callback ){
     
     var voice = pollyVoices[ sentence.length % pollyVoices.length ];
     
@@ -71,7 +73,15 @@ function renderSentenceForRealsies( sentence, filename ){
             TextType: "text"
         },
         function( err, data ){
-            if( err ) throw err;
+            if( err ) callback( err );
+            else {
+                itPutsTheStreamInTheBucket(
+                    data.AudioStream,
+                    filename,
+                    data.ContentType,
+                    callback
+                );
+            }
             
             /*
             fs.writeFile(
@@ -82,11 +92,7 @@ function renderSentenceForRealsies( sentence, filename ){
                 }
             );*/
 
-            itPutsTheStreamInTheBucket(
-                data.AudioStream,
-                filename,
-                data.ContentType
-            );
+            
         }
     );
 }
@@ -111,16 +117,19 @@ function renderSentence( sentence, callback ){
                 // console.log( "--> key does not exist, render" );
                 // error! object probably doesn't exist, so render it
                 // console.log( err );
-                renderSentenceForRealsies( sentence, filename );
+                renderSentenceForRealsies( sentence, filename, function(err){
+                    if( err ) callback( err );
+                    else callback( null, fileURL );
+                });
             
             } else {
                 // success! object exists, so let's not do anything.
                 // console.log( "--> key exists, don't render" );
                 // console.log( data );
+                callback( null, fileURL );
             }
 
             // pass fileURL to main callback only when headObject has completed
-            callback( null, fileURL );
         }
     );
 }
