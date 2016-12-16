@@ -30,9 +30,6 @@ function processItem( item, stem ){
             
             var sentence = sentences[ii];
 
-//            console.log( sentence );
-            // console.log( "sentence length: " + sentence.split(' ').length );
-
             // now, let's do some checks on this sentence.
             var acceptSentence = true;
 
@@ -53,7 +50,11 @@ function processItem( item, stem ){
             if( sentence.match(/['"“”‘’]/gi) )
                 acceptSentence = false;
 
-            // console.log( `-> acceptSentence:${acceptSentence}` );
+            // as do things with a lot of clauses
+            var m = sentence.match(/[,;:-–—−]/gi);
+            if( m && m.length > 1 )
+                acceptSentence = false;
+
 
             // all checks done, push if acceptable
             if( acceptSentence )
