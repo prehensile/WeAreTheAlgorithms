@@ -79,7 +79,7 @@ function onDramaturgeCallback( err, speechElements, response ){
     });
 }
 
-function generateWelcome( response ){
+function generateWelcomeHandler( response ){
 
     __ts = new Date().getTime();
 
@@ -92,19 +92,40 @@ function generateWelcome( response ){
     }); 
 }
 
+
+function interrogateSubjectHandler( intent, response ){
+    
+    __ts = new Date().getTime();
+
+    var subjectSlot = intent.slots.Subject;
+    // slots can be missing, or slots can be provided but with empty value.
+    if (!subjectSlot || !subjectSlot.value) {
+        // TODO: handle blank subject properly. for now, just reroute to welcome
+        generateWelcomeHandler( response );
+    
+    } else {
+        // slot value is popuated
+        var subject = subjectSlot.value;
+        
+        dramaturge.interrogateSubject(
+            
+            subject, 
+            
+            function( err, speechElements ){
+                onDramaturgeCallback(
+                    err,
+                    speechElements,
+                    response
+                );
+            }
+        );
+    }
+}
+
 HelloAlgos.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("HelloAlgos onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
     
-    // dramaturge.getWelcome( function(err,sentenceURLs){
-    //     handleSentenceURLCallback( err, sentenceURLs, response );
-    // });
-
-    generateWelcome( response );
-
-    // response.ask(
-    //     speechOutput,
-    //     repromptText
-    // );
+    generateWelcomeHandler( response );
 };
 
 HelloAlgos.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
@@ -119,11 +140,17 @@ HelloAlgos.prototype.intentHandlers = {
     "HelloIntent": function (intent, session, response) {
         //response.tellWithCard("Hello World!", "Hello World", "Hello World!");
         console.log( "intentHandler: HelloIntent" );
-        generateWelcome( response );
+        generateWelcomeHandler( response );
+    },
+
+    "SubjectIntent": function (intent, session, response) {
+        console.log( "intentHandler: SubjectIntent" );
+        interrogateSubjectHandler( intent, response );
     },
     
     "AMAZON.HelpIntent": function ( intent, session, response ) {
-        response.ask("You can say hello to me!", "You can say hello to me!");
+        // response.ask("You can say hello to me!", "You can say hello to me!");
+        generateWelcomeHandler( response );
     }
 };
 

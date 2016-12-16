@@ -34,8 +34,6 @@ function onSentencesWritten( sentences, speechElements, callback ){
 
 function getWelcome( callback ){
 
-    console.log( "getWelcome" );
-
     var speechElements = [{
         type: "text",
         content: "Hello!"
@@ -54,6 +52,12 @@ function getWelcome( callback ){
 }
 
 
+function interrogateSubject( subject, callback ){
+
+}
+
+
 module.exports = {
-    "getWelcome" : getWelcome
+    "getWelcome" : getWelcome,
+    "interrogateSubject" : interrogateSubject
 };

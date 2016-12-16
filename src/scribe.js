@@ -1,6 +1,7 @@
-var Chance = require('chance');
+const Chance = require('chance');
 
-var bing = require( "./bingHandler" );
+const bing = require( "./bingHandler" );
+const cropCirles = require( "./cropCirles" );
 
 const K_DYNAMIC = "dynamic";
 const K_CANNED = "canned";
@@ -91,6 +92,30 @@ function constructWelcomeSentences( callback ){
 }
 
 
+/**
+ * ASK THE ALGORITHMS ABOUT A PARTICULAR SUBJECT
+ */
+
+function constructSubjectSentences( subject, callback ){
+    
+    if( [ "finance", "money", "trading" ].includes( subject.toLowerCase() ) ){
+        // special case for trading algo names
+        //if( chance.bool() ){
+        if( true ){
+            return callback(
+                null,
+                chance.pickset( cropCircles.names, 5 )
+            );
+        }
+    }
+
+    // if we're here, just do a normal query
+    // TODO: bing stuff
+
+}
+
+
 module.exports = {
-    "constructWelcomeSentences" : constructWelcomeSentences
+    "constructWelcomeSentences" : constructWelcomeSentences,
+    "constructSubjectSentences" : constructSubjectSentences
 };
