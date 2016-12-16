@@ -58,6 +58,9 @@ function itPutsTheStreamInTheBucket( stream, key, contentType, callback ){
 function renderSentenceForRealsies( sentence, filename, callback ){
     
     var voice = pollyVoices[ sentence.length % pollyVoices.length ];
+
+    // wrap text in prosody element to boost volume to match alexa's voice
+    sentence = `<prosody volume="loud">${sentence}</prosody`;
     
     polly.synthesizeSpeech(
         {
