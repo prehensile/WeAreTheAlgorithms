@@ -1,4 +1,4 @@
-const layrnx = require( "./layrnx" );
+const polly = require( "./pollyHandler" );
 const scribe = require( "./scribe" );
 
 
@@ -21,7 +21,7 @@ function onSentencesWritten( sentences, speechElements, callback ){
 
     // console.log( "onSentencesWritten" );
 
-    layrnx.renderSentences( sentences , function( err, urls ){
+    polly.renderSentences( sentences , function( err, urls ){
         if (err) return callback( err );
         else onSentencesRendered(
             urls, 

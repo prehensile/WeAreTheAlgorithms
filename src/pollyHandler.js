@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const fs = require('fs');
 
 const AWS = require('aws-sdk');
@@ -28,7 +27,6 @@ var pollyVoices = [
 
 
 function keyForSentence( sentence ){
-    // return crypto.createHash('md5').update( sentence ).digest( 'hex' );
     return sentence.toLowerCase().replace(/[^bcdfghjklmnpqrstvwxyz]/g,'');
 }
 
@@ -39,8 +37,6 @@ function bucketURLForKey( key ){
 
 
 function itPutsTheStreamInTheBucket( stream, key, contentType, callback ){
-
-   console.log( `itPutsTheStreamInTheBucket( ${key} )` );
 
     s3.upload(
         {
@@ -63,8 +59,6 @@ function renderSentenceForRealsies( sentence, filename, callback ){
     
     var voice = pollyVoices[ sentence.length % pollyVoices.length ];
     
-    // console.log( `renderSentenceForRealsies( ${sentence}, ${filename} )` );
-
     polly.synthesizeSpeech(
         {
             OutputFormat : "mp3",
@@ -82,29 +76,15 @@ function renderSentenceForRealsies( sentence, filename, callback ){
                     callback
                 );
             }
-            
-            /*
-            fs.writeFile(
-                filename,
-                data.AudioStream,
-                function( err ){
-                    if( err ) throw err;
-                }
-            );*/
-
-            
         }
     );
 }
 
 function renderSentence( sentence, callback ){
     
-    console.log( "renderSentence: " + sentence );
-
     var filename = keyForSentence( sentence ) + ".mp3";
     var fileURL = bucketURLForKey( filename );
 
-    // console.log( `-> check if key ${filename} exists...` );
     // before rendering, check if this sentence is already in S3
     s3.headObject( 
         {
@@ -114,22 +94,16 @@ function renderSentence( sentence, callback ){
         function( err, data ) {
             
             if( err ){
-                // console.log( "--> key does not exist, render" );
                 // error! object probably doesn't exist, so render it
-                // console.log( err );
                 renderSentenceForRealsies( sentence, filename, function(err){
                     if( err ) callback( err );
                     else callback( null, fileURL );
                 });
             
             } else {
-                // success! object exists, so let's not do anything.
-                // console.log( "--> key exists, don't render" );
-                // console.log( data );
+                // success! object exists, so let's callback immediately.
                 callback( null, fileURL );
             }
-
-            // pass fileURL to main callback only when headObject has completed
         }
     );
 }
