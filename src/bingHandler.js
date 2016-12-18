@@ -120,13 +120,22 @@ function processResults( body, stems ){
 function getStatementsWithStemsAndSubject( stems, subject, callback ){
 
     // construct query
-    var queryElements = [];
-    stems.forEach( function(stem,index,array){
-        queryElements.push( `"${stem}"` );
-    });
-    var q = queryElements.join( " OR " );
+    var q = "";
+    
+    if( stems && stems.length > 0 ){
+        var queryElements = [];
+        stems.forEach( function(stem,index,array){
+            queryElements.push( `"${stem}"` );
+        });
+        q = queryElements.join( " OR " );
+    }
 
-    if( subject ) q = `"${q}" AND "${subject}"`;
+    if( subject ){
+        if( q.length > 0 )
+            q = `(${q}) AND "${subject}"`;
+        else
+            q = subject;
+    }
 
     console.log( `bing query: ${q}` );
     var ms = new Date().getTime();
@@ -151,15 +160,13 @@ function getStatementsWithStemsAndSubject( stems, subject, callback ){
 }
 
 
-const defaultStems = [ 'algorithms are', 'algorithms will' ];
-
-function getStatementsForSubject( subject, callback ){
-    getStatementsWithStemsAndSubject( defaultStems, subject, callback );
+function getStatementsForSubject( stems, subject, callback ){
+    getStatementsWithStemsAndSubject( stems, subject, callback );
 }
 
 
-function getOpeningStatements( callback ){
-    getStatementsWithStemsAndSubject( defaultStems, null, callback );
+function getOpeningStatements( stems, callback ){
+    getStatementsWithStemsAndSubject( stems, null, callback );
 }
 
 

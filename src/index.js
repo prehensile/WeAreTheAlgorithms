@@ -28,7 +28,7 @@ var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-valu
  */
 const AlexaSkill = require('./AlexaSkill');
 
-const dramaturge = require('./dramaturge');
+const producer = require('./producer');
 const systemMessages = require('./systemMessages');
 const alexaHelpers = require('./alexaHelpers');
 
@@ -61,7 +61,7 @@ function handleError( err, response ){
     response.tell( systemMessages.GenericError );
 }
 
-function onDramaturgeCallback( err, speechElements, response ){
+function onProducerCallback( err, speechElements, response ){
     
     if( err ){
         // TODO: more graceful handling of errors
@@ -83,8 +83,8 @@ function generateWelcomeHandler( response ){
 
     __ts = new Date().getTime();
 
-    dramaturge.getWelcome( function( err, speechElements ){
-        onDramaturgeCallback(
+    producer.getWelcome( function( err, speechElements ){
+        onProducerCallback(
             err,
             speechElements,
             response
@@ -105,14 +105,14 @@ function interrogateSubjectHandler( intent, response ){
     
     } else {
         // slot value is popuated
-        var subject = subjectSlot.value;
+        var subject = subjectSlot.value.toLowerCase();
         
-        dramaturge.interrogateSubject(
+        producer.interrogateSubject(
             
             subject, 
             
             function( err, speechElements ){
-                onDramaturgeCallback(
+                onProducerCallback(
                     err,
                     speechElements,
                     response

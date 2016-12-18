@@ -1,7 +1,7 @@
 const Chance = require('chance');
 
 const bing = require( "./bingHandler" );
-const cropCirles = require( "./vocabulary/cropCirles" );
+const cropCircles = require( "./vocabulary/cropCircles" );
 
 const K_DYNAMIC = "dynamic";
 const K_CANNED = "canned";
@@ -41,8 +41,14 @@ var welcomeSentences = [
 ];
 
 
-function prepareDynamicSentence( sentence ){
-    sentence = sentence.replace( /algorithms/gi, 'we' );
+function prepareDynamicSentence( sentence, stems, replacements ){
+    
+    stems.forEach(function(stem){
+        sentence = sentence.replace( new RegExp(stem, 'gi'), replacements[stem] );    
+    });
+    
+    sentence = sentence.replace( /([\W]+)me([\W]+)/gi , '$1you$2' );
+    sentence = sentence.replace( /([\W]+)it has([\W]+)/gi , '$1we have$2' );
     sentence = sentence.replace( /([\W]+)us([\W]+)/gi , '$1you$2' );
     sentence = sentence.replace( /([\W]+)our([\W]+)/gi , '$1your$2' );
     sentence = sentence.replace( /([\W]+)they([\W]+)/gi , '$1we$2' );
@@ -53,7 +59,7 @@ function prepareDynamicSentence( sentence ){
 }
 
 
-function constructSentences( welcomeSentences, dynamicStatements, callback ){
+function constructSentences( welcomeSentences, dynamicStatements, callback, stems, stemReplacements ){
 
     sentencesOut = [];
 
@@ -67,7 +73,9 @@ function constructSentences( welcomeSentences, dynamicStatements, callback ){
         if( thisSentence == K_DYNAMIC ){
             
             thisSentence = prepareDynamicSentence(
-                dynamicStatements[ i ]
+                dynamicStatements[ i ], 
+                stems,
+                stemReplacements
             );
         
         } else if( thisSentence == K_CANNED ){
@@ -82,14 +90,30 @@ function constructSentences( welcomeSentences, dynamicStatements, callback ){
 }
 
 
+const defaultStems = [ 'algorithms are', 'algorithms will' ];
+const stemReplacements = {
+    'algorithms are' : 'we are',
+    'algorithms will' : 'we will'
+};
+
+/**
+ * SAY HELLO TO THE ALGORITHMS
+ */
+
 function constructWelcomeSentences( callback ){
-    bing.getOpeningStatements( function(err, statements){
-        if(err){
-            return callback( err );
-        } else {
-            constructSentences( welcomeSentences, statements, callback );
+    bing.getOpeningStatements(
+        defaultStems,
+        function(err, statements){
+            if(err) return callback( err );
+            else constructSentences(
+                welcomeSentences,
+                statements,
+                callback,
+                defaultStems,
+                stemReplacements
+            );
         }
-    });
+    );
 }
 
 
@@ -97,9 +121,21 @@ function constructWelcomeSentences( callback ){
  * ASK THE ALGORITHMS ABOUT A PARTICULAR SUBJECT
  */
 
+function prepareSubjectSentences( sentences, stems, stemReplacements ){
+    
+    sentences = chance.pickset( sentences, 5 );
+    
+    sentences = sentences.map( function(sentence){
+        return prepareDynamicSentence( sentence, stems, stemReplacements );
+    });
+    
+    return sentences;
+}
+
+
 function constructSubjectSentences( subject, callback ){
     
-    if( [ "finance", "money", "trading" ].includes( subject.toLowerCase() ) ){
+    if( [ "finance", "money", "trading" ].indexOf( subject.toLowerCase() ) > -1 ){
         // special case for trading algo names
         //if( chance.bool() ){
         if( true ){
@@ -111,7 +147,21 @@ function constructSubjectSentences( subject, callback ){
     }
 
     // if we're here, just do a normal query
-    // TODO: bing stuff
+    bing.getStatementsForSubject(
+        defaultStems,
+        subject,
+        function(err, statements){
+            if(err) return callback( err );
+            else callback(
+                null,
+                prepareSubjectSentences(
+                    statements,
+                    defaultStems,
+                    stemReplacements
+                )
+            );
+        }
+    );
 
 }
 
