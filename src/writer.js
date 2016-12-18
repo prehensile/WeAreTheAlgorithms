@@ -1,7 +1,7 @@
 const Chance = require('chance');
 
 const bing = require( "./bingHandler" );
-const cropCirles = require( "./cropCirles" );
+const cropCirles = require( "./vocabulary/cropCirles" );
 
 const K_DYNAMIC = "dynamic";
 const K_CANNED = "canned";

@@ -1,5 +1,5 @@
 const polly = require( "./pollyHandler" );
-const scribe = require( "./scribe" );
+const writer = require( "./writer" );
 
 
 function onSentencesRendered( sentenceURLs, speechElements, callback ){
@@ -39,7 +39,7 @@ function getWelcome( callback ){
         content: "Hello!"
     }];
 
-    scribe.constructWelcomeSentences(
+    writer.constructWelcomeSentences(
         function( err,sentences ){
             if (err) return callback( err );
             else onSentencesWritten(
@@ -54,6 +54,16 @@ function getWelcome( callback ){
 
 function interrogateSubject( subject, callback ){
 
+    writer.constructSubjectSentences(
+        function( err,sentences ){
+            if (err) return callback( err );
+            else onSentencesWritten(
+                sentences,
+                speechElements,
+                callback
+            );
+        }
+    );
 }
 
 
