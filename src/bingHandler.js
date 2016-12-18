@@ -1,9 +1,10 @@
-var fs = require('fs');
+const fs = require('fs');
 
-var secrets = require( './config/secrets' );
+const secrets = require( './config/secrets' );
+const bullshit = require( './vocabulary/bullshit');
 
-var Bing = require('node-bing-api')({ accKey: secrets.BingKey });
-var Tokenizer = require('sentence-tokenizer');
+const Bing = require('node-bing-api')({ accKey: secrets.BingKey });
+const Tokenizer = require('sentence-tokenizer');
 
 
 var tokenizer = new Tokenizer( 'node-sentences' );
@@ -44,6 +45,10 @@ function processItem( item, stems ){
             // if any fail, continue to the next sentence
             // without adding to the statements array
 
+            // ditch sentences that contain too much bullshit
+            if( bullshit.score( sentence ) > 2)
+                continue;
+
             var stemIndex = sentence.toLowerCase().indexOf( stem );
             
             // only include sentences that include a stem
@@ -65,7 +70,7 @@ function processItem( item, stems ){
                 // if we haven't bailed, use the first conjoiner or clause marker as a break point
                 var breakIndex = sentence.length;
                 if(firstClause.length > 0) breakIndex = Math.min( breakIndex, firstClause.index );
-                if(firstConjoiner.length > 0) breakIndex = Math.min( breakIndex, firstConjoiner.index );
+                if(firstConjoiner.length > 0) breakIndex = Math.min( breakIndex, firstConjoiner.index -1 );
 
                 // chop truncated sentence down to first clause
                 sentence = sentence.substring( 0, breakIndex );
