@@ -48,6 +48,7 @@ function prepareDynamicSentence( sentence ){
     sentence = sentence.replace( /([\W]+)they([\W]+)/gi , '$1we$2' );
     sentence = sentence.replace( /([\W]+)them([\W]+)/gi , '$1us$2' );
     sentence = sentence.replace( /([\W]+)their([\W]+)/gi , '$1our$2' );
+    sentence = sentence.replace( /([\W]+)themselves([\W]+)/gi , '$1ourselves$2' );
     return sentence;
 }
 
@@ -82,7 +83,7 @@ function constructSentences( welcomeSentences, dynamicStatements, callback ){
 
 
 function constructWelcomeSentences( callback ){
-    bing.getStatements( function(err, statements){
+    bing.getOpeningStatements( function(err, statements){
         if(err){
             return callback( err );
         } else {

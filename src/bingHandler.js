@@ -12,17 +12,24 @@ var reClauses = new RegExp( /[,\;:\-\–\—\−]/gi );
 var reConjunctions = new RegExp( /(\band\b)|(\bor\b)/gi );
 
 
-function processItem( item, stem ){
+function processItem( item, stems ){
     
     var statements = [];
     var d = item.description;
     
-    var reStem = new RegExp( stem, 'i' );
-    var i = d.search( reStem );
-    if( i > -1 ){
+    // normalise stems to lowercase
+    stems = stems.map( function(stem){
+        return stem.toLowerCase();
+    });
+
+    // check description contains at least one stem
+    var di = item.description.toLowerCase();
+    stems.forEach(function(stem){
         
-        // trim description to stem and everything after
-        d = d.substring( i );
+        var i = di.indexOf( stem );
+
+        // bail if stem isn't in description
+        if( i < 0 ) return;
         
         // break description into sentences
         tokenizer.setEntry( d );
@@ -32,15 +39,19 @@ function processItem( item, stem ){
         for( var ii in sentences ){
             
             var sentence = sentences[ii];
-            console.log( sentence );
-
+            
             // now, let's do some checks on the sentence.
             // if any fail, continue to the next sentence
             // without adding to the statements array
 
+            var stemIndex = sentence.toLowerCase().indexOf( stem );
+            
             // only include sentences that include a stem
-            if( sentence.search( reStem ) < 0 )
+            if( stemIndex < 0 )
                 continue;
+
+            // trim sentence to stem and everything after
+            sentence = sentence.substring( stemIndex );
 
             // if we've found a truncated sentence...
             if( sentence.indexOf( "..." ) > -1 ){
@@ -71,42 +82,46 @@ function processItem( item, stem ){
 
             // as do things with a lot of clauses
             var m = sentence.match( reClauses );
-            if( m && m.length > 3 )
+            if( m && m.length > 2 )
                 continue;
 
             // if we're here, the sentence has passed all checks
             // ( no continues have been hit)
-            statements.push( sentence );
+            if( statements.indexOf( sentence ) < 0 )
+                statements.push( sentence );
         }
-    }
+
+    });
 
     return statements;
 }
 
-function processResults( body, stem ){
+
+function processResults( body, stems ){
 
     var statements = [];
     for( var i in body.value ){
         var thisItem = body.value[i];
-        //console.log( thisItem.description );
-        var sentences = processItem( thisItem, stem );
+        var sentences = processItem( thisItem, stems );
         if( sentences.length > 0 ){
             statements = statements.concat( sentences );
         }
     }
 
-    // console.log( statements );
-
     return statements;
 }
 
-function getStatementsWithStemAndSubject( stem, subject, callback ){
 
-    if( !stem ) stem = "algorithms are";
-    
-    //var q = `"${stem}"`;
-    var q = `"algorithms are" OR "algorithms will"`;
-    if( subject ) q = `"${stem}" ${subject}`;
+function getStatementsWithStemsAndSubject( stems, subject, callback ){
+
+    // construct query
+    var queryElements = [];
+    stems.forEach( function(stem,index,array){
+        queryElements.push( `"${stem}"` );
+    });
+    var q = queryElements.join( " OR " );
+
+    if( subject ) q = `"${q}" AND "${subject}"`;
 
     console.log( `bing query: ${q}` );
     var ms = new Date().getTime();
@@ -118,28 +133,33 @@ function getStatementsWithStemAndSubject( stem, subject, callback ){
         
         ms = new Date().getTime() - ms;
         console.log( `-> bing query completed in ${ms}ms` );
-        console.log( res );
+        //console.log( res );
 
         if( error ){
             return callback( error, null );
         }
 
-        var statements = processResults( body, stem );
+        var statements = processResults( body, stems );
         callback( null, statements );
 
     });
 }
 
+
+const defaultStems = [ 'algorithms are', 'algorithms will' ];
+
 function getStatementsForSubject( subject, callback ){
-    getStatementsWithStemAndSubject( null, subject, callback );
+    getStatementsWithStemsAndSubject( defaultStems, subject, callback );
 }
 
-function getStatements( callback ){
-    getStatementsWithStemAndSubject( null, null, callback );
+
+function getOpeningStatements( callback ){
+    getStatementsWithStemsAndSubject( defaultStems, null, callback );
 }
+
 
 module.exports = {
-    "getStatements" : getStatements,
+    "getOpeningStatements" : getOpeningStatements,
     "getStatementsForSubject" : getStatementsForSubject,
     "processItem" : processItem
 };
