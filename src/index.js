@@ -26,10 +26,10 @@ var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-valu
 /**
  * The AlexaSkill prototype and helper functions
  */
-var AlexaSkill = require('./AlexaSkill');
+const AlexaSkill = require('./AlexaSkill');
 
-var dramaturge = require('./dramaturge');
-var stringTable = require('./stringTable');
+const dramaturge = require('./dramaturge');
+const systemMessages = require('./systemMessages');
 const alexaHelpers = require('./alexaHelpers');
 
 
@@ -58,7 +58,7 @@ HelloAlgos.prototype.eventHandlers.onSessionStarted = function (sessionStartedRe
 
 function handleError( err, response ){
     console.error( err );
-    response.tell( stringTable.GenericError );
+    response.tell( systemMessages.GenericError );
 }
 
 function onDramaturgeCallback( err, speechElements, response ){

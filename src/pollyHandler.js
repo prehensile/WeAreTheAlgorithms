@@ -3,8 +3,8 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const async = require('async');
 
-const secrets = require( './secrets' );
-const config = require( './config' );
+const secrets = require( './config/secrets' );
+const config = require( './config/config' );
 
 
 var awsDefaults = {
